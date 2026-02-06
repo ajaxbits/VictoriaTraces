@@ -6,5 +6,8 @@ type filterTrace struct {
 }
 
 func (f *filterTrace) String() string {
-	return "{" + f.andFilter.String() + "}"
+	if f.andFilter.String() == "" {
+		return "*"
+	}
+	return f.andFilter.String()
 }
