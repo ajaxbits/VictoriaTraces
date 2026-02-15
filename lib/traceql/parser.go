@@ -32,6 +32,11 @@ func (q *Query) String() string {
 	return s
 }
 
+// HasPipe indicates whether this query contains only filter(s), or contains filter(s) along with pipe(s).
+func (q *Query) HasPipe() bool {
+	return len(q.pipes) > 0
+}
+
 // ParseQuery parses s.
 func ParseQuery(s string) (*Query, error) {
 	timestamp := time.Now().UnixNano()
@@ -170,7 +175,7 @@ func parsePipes(lex *lexer) ([]pipe, error) {
 func parseFilterGeneric(lex *lexer, fieldName string) (filter, error) {
 	// Verify the previous adjacent token
 	if lex.isKeyword("{", "(") {
-		if err := lex.checkPrevAdjacentToken("(", "||", "&&"); err != nil {
+		if err := lex.checkPrevAdjacentToken("{", "(", "||", "&&"); err != nil {
 			return nil, err
 		}
 	}
@@ -253,7 +258,7 @@ func parseFilterCurlyBrackets(lex *lexer, fieldName string) (filter, error) {
 		}, nil
 	}
 
-	f, err := parseFilterAnd(lex, fieldName)
+	f, err := parseFilterOr(lex, fieldName)
 	if err != nil {
 		return nil, err
 	}

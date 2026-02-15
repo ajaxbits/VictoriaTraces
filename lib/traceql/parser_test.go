@@ -73,5 +73,6 @@ func Test_parseQuery(t *testing.T) {
 	//f(`{} && {nestedSetParent<0 && true && "span.app.ads.ad_request_type" != "nil"}`)
 	//f(`{} && {nestedSetParent<0 && ({true}) && "span.app.ads.ad_request_type" != "nil"}`)
 	//f(`{ span.http.request_content_length > "10 * 1024 * 1024" }`)
-	f(`{ span.http.request_content_length > 10} | select(span.http.request_content_length) | by(span.http.request_content_length, span.http.request_content_length2) | sum(other_field) > 2m`)
+	//f(`{ span.http.request_content_length > 10} | select(span.http.request_content_length) | by(span.http.request_content_length, span.http.request_content_length2) | sum(other_field) > 2m`)
+	f(`{(a=b && c=d && c=d)}`)
 }

@@ -103,4 +103,28 @@
 }
 {% endfunc %}
 
+{% func SearchResponse(summaryList []traceSummary) %}
+{
+	"traces": [
+        {% if len(summaryList) > 0 %}
+            {%= summaryJson(summaryList[0]) %}
+            {% for _, summary := range summaryList[1:] %}
+                ,{%= summaryJson(summary) %}
+            {% endfor %}
+        {% endif %}
+    ]
+}
+{% endfunc %}
+
+{% func summaryJson(summary traceSummary) %}
+{
+	"traceID":{%q= summary.traceID %},
+	"rootServiceName":{%q= summary.rootServiceName %},
+	"rootTraceName":{%q= summary.rootTraceName %},
+	"startTimeUnixNano":{%dl= summary.startTimeUnixNano %},
+	"durationMs":{%dl= (summary.endTimeUnixNano - summary.startTimeUnixNano) / 1e6 %},
+	"spanSets": []
+}
+{% endfunc %}
+
 {% endstripspace %}
