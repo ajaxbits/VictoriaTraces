@@ -12,31 +12,43 @@ type filterCommon struct {
 	value     string
 }
 
-func (fp *filterCommon) String() string {
-	v := fp.value
+func (fc *filterCommon) String() string {
+	// traceDuration must be treated as pipe
+	if fc.fieldName == "traceDuration" {
+		return "*"
+	}
+
+	v := fc.value
 	if duration, ok := tryParseDuration(v); ok {
 		v = strconv.FormatInt(duration, 10)
 	}
-	return quoteFieldNameIfNeeded(fp.tagToVTField()) + ":" + fp.op + quoteTokenIfNeeded(v)
+	return quoteFieldNameIfNeeded(fc.tagToVTField()) + ":" + fc.op + quoteTokenIfNeeded(v)
 }
 
-func (fp *filterCommon) tagToVTField() string {
-	if strings.HasPrefix(fp.fieldName, "resource.") {
-		return otelpb.ResourceAttrPrefix + fp.fieldName[len("resource."):]
-	} else if strings.HasPrefix(fp.fieldName, "span.") {
-		return otelpb.SpanAttrPrefixField + fp.fieldName[len("span."):]
-	} else if strings.HasPrefix(fp.fieldName, "event.") {
-		return otelpb.EventPrefix + otelpb.EventAttrPrefix + fp.fieldName[len("event."):]
-	} else if strings.HasPrefix(fp.fieldName, "link.") {
-		return otelpb.LinkPrefix + otelpb.LinkAttrPrefix + fp.fieldName[len("link."):]
-	} else if strings.HasPrefix(fp.fieldName, "instrumentation.") {
-		return otelpb.InstrumentationScopeAttrPrefix + fp.fieldName[len("instrumentation."):]
-	} else if fp.fieldName == "status" {
+func (fc *filterCommon) tagToVTField() string {
+	if strings.HasPrefix(fc.fieldName, "resource.") {
+		return otelpb.ResourceAttrPrefix + fc.fieldName[len("resource."):]
+	} else if strings.HasPrefix(fc.fieldName, "span.") {
+		return otelpb.SpanAttrPrefixField + fc.fieldName[len("span."):]
+	} else if strings.HasPrefix(fc.fieldName, "event.") {
+		return otelpb.EventPrefix + otelpb.EventAttrPrefix + fc.fieldName[len("event."):]
+	} else if strings.HasPrefix(fc.fieldName, "link.") {
+		return otelpb.LinkPrefix + otelpb.LinkAttrPrefix + fc.fieldName[len("link."):]
+	} else if strings.HasPrefix(fc.fieldName, "instrumentation.") {
+		return otelpb.InstrumentationScopeAttrPrefix + fc.fieldName[len("instrumentation."):]
+	} else if fc.fieldName == "status" {
 		return otelpb.StatusCodeField
 	}
-	return fp.fieldName
+	return fc.fieldName
 }
 
 func quoteFieldNameIfNeeded(s string) string {
 	return quoteTokenIfNeeded(s)
+}
+
+func (fc *filterCommon) GetTraceDurationFilters() []*filterCommon {
+	if fc.fieldName == "traceDuration" {
+		return []*filterCommon{fc}
+	}
+	return nil
 }

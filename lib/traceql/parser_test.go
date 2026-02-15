@@ -36,7 +36,7 @@ func TestLexer(t *testing.T) {
 
 	// TraceQL lexer
 	f(`a.n`, []string{"a.n"})
-	f(`{ac.name = "frontend"}`, []string{"{", "ac.name", "=", "frontend", "}"})
+	f(`{ac.name >= "frontend"}`, []string{"{", "ac.name", ">=", "frontend", "}"})
 	f(`{"ac.name" = "frontend"}`, []string{"{", "ac.name", "=", "frontend", "}"})
 	f(`{a && b}`, []string{"{", "a", "&&", "b", "}"})
 	f(`{a &>> b}`, []string{"{", "a", "&>>", "b", "}"})
@@ -75,4 +75,21 @@ func Test_parseQuery(t *testing.T) {
 	//f(`{ span.http.request_content_length > "10 * 1024 * 1024" }`)
 	//f(`{ span.http.request_content_length > 10} | select(span.http.request_content_length) | by(span.http.request_content_length, span.http.request_content_length2) | sum(other_field) > 2m`)
 	f(`{(a=b && c=d && c=d)}`)
+}
+
+func TestGetTraceDurationFilters(t *testing.T) {
+	f := func(s string) {
+		t.Helper()
+		lex := newLexer(s, 0)
+		q, err := parseQuery(lex)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println(q.String())
+	}
+
+	f(`{(a=b && c=d && c=d)}`)
+	f(`{(traceDuration=10ms && c=d && c=d)}`)
+	f(`{(traceDuration>10ms && c=d && c=d)}`)
+	f(`{(traceDuration>=10ms && traceDuration<1s && c=d)}`)
 }

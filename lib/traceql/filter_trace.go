@@ -11,3 +11,7 @@ func (f *filterTrace) String() string {
 	}
 	return f.andFilter.String()
 }
+
+func (f *filterTrace) GetTraceDurationFilters() []*filterCommon {
+	return f.andFilter.GetTraceDurationFilters()
+}

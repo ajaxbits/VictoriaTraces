@@ -14,3 +14,7 @@ type filterPhrase struct {
 func (fp *filterPhrase) String() string {
 	return quoteFieldNameIfNeeded(fp.fieldName) + "=" + quoteTokenIfNeeded(fp.phrase)
 }
+
+func (fp *filterPhrase) GetTraceDurationFilters() []*filterCommon {
+	return nil
+}

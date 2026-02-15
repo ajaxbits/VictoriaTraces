@@ -119,7 +119,7 @@ func GetTraceList(ctx context.Context, cp *tracecommon.CommonParams, filterQuery
 }
 
 func getTraceIDList(ctx context.Context, cp *tracecommon.CommonParams, filterQuery *traceql.Query, start, end time.Time, limit int64) ([]string, time.Time, error) {
-	qStr := filterQuery.String() + ` AND {trace_id_idx_stream=""} | last 1 by (_time) partition by (` + otelpb.TraceIDField + ") | fields _time, " + otelpb.TraceIDField + " | sort by (_time) desc"
+	qStr := `{trace_id_idx_stream=""} AND ` + filterQuery.String() + ` | last 1 by (_time) partition by (` + otelpb.TraceIDField + ") | fields _time, " + otelpb.TraceIDField + " | sort by (_time) desc"
 
 	q, err := logstorage.ParseQueryAtTimestamp(qStr, end.UnixNano())
 	if err != nil {
@@ -129,7 +129,7 @@ func getTraceIDList(ctx context.Context, cp *tracecommon.CommonParams, filterQue
 
 	// adjust the max start time, because fresh traces may not be completed.
 	// they should wait for *latencyOffset before being visible. currently hardcoded as 1m.
-	maxStartTime := time.Now().Add(-1 * time.Minute)
+	maxStartTime := time.Now().Add(-*tracecommon.LatencyOffset)
 	if end.After(maxStartTime) {
 		end = maxStartTime
 	}
@@ -362,7 +362,7 @@ func findTraceIDTimeSplitTimeRange(ctx context.Context, q *logstorage.Query, cp 
 		traceIDStartTime, _ := strconv.ParseInt(traceIDStartTimeStr, 10, 64)
 		traceIDEndTime, _ := strconv.ParseInt(traceIDEndTimeStr, 10, 64)
 
-		return time.Unix(traceIDStartTime/int64(time.Second), traceIDStartTime%int64(time.Second)), time.Unix(traceIDEndTime/int64(time.Second), traceIDEndTime%int64(time.Second)), nil
+		return time.Unix(traceIDStartTime/1e9, traceIDStartTime%1e9), time.Unix(traceIDEndTime/1e9, traceIDEndTime%1e9), nil
 	}
 	return time.Time{}, time.Time{}, vtstoragecommon.ErrOutOfRetention
 }

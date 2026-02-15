@@ -25,6 +25,20 @@ type Query struct {
 func (q *Query) String() string {
 	s := q.f.String()
 
+	// merge trace duration filter if any
+	traceDurationFilters := q.f.GetTraceDurationFilters()
+	if len(traceDurationFilters) > 0 {
+		tFilterStr := " "
+		for _, tf := range traceDurationFilters {
+			v := tf.value
+			if duration, ok := tryParseDuration(v); ok {
+				v = strconv.FormatInt(duration, 10)
+			}
+			tFilterStr += fmt.Sprintf("AND duration :%s %s ", tf.op, v)
+		}
+		s += fmt.Sprintf(` | join by (trace_id) ({trace_id_idx_stream!=""} %s | fields trace_id_idx  | rename trace_id_idx as trace_id) inner`, tFilterStr)
+	}
+
 	for _, p := range q.pipes {
 		s += " | " + p.String()
 	}
@@ -471,6 +485,13 @@ again:
 		return
 	case '|':
 		if strings.HasPrefix(s[size:], "|") {
+			lex.nextCharToken(s, 2)
+			return
+		}
+		lex.nextCharToken(s, 1)
+		return
+	case '>', '<':
+		if strings.HasPrefix(s[size:], "=") {
 			lex.nextCharToken(s, 2)
 			return
 		}

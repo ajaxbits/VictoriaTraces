@@ -23,3 +23,11 @@ func (fa *filterAnd) String() string {
 	}
 	return strings.Join(a, " and ")
 }
+
+func (fa *filterAnd) GetTraceDurationFilters() []*filterCommon {
+	result := make([]*filterCommon, 0)
+	for _, f := range fa.filters {
+		result = append(result, f.GetTraceDurationFilters()...)
+	}
+	return result
+}

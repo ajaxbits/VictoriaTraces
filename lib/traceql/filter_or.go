@@ -20,3 +20,11 @@ func (fo *filterOr) String() string {
 	}
 	return strings.Join(a, " or ")
 }
+
+func (fo *filterOr) GetTraceDurationFilters() []*filterCommon {
+	result := make([]*filterCommon, 0)
+	for _, f := range fo.filters {
+		result = append(result, f.GetTraceDurationFilters()...)
+	}
+	return result
+}

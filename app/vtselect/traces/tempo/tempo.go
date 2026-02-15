@@ -277,9 +277,11 @@ func searchTags(ctx context.Context, cp *tracecommon.CommonParams, traceQLStr st
 	case "span":
 		scopes = fmt.Sprintf(`| filter name:"%s:"*`, otelpb.SpanAttrPrefixField)
 	case "event":
-		scopes = fmt.Sprintf(`| filter name:"%s:"*`, otelpb.EventPrefix+otelpb.EventAttrPrefix)
+		//scopes = fmt.Sprintf(`| filter name:"%s:"*`, otelpb.EventPrefix+otelpb.EventAttrPrefix)
+		return nil, errors.New("scope: event is not supported yet")
 	case "link":
-		scopes = fmt.Sprintf(`| filter name:"%s:"*`, otelpb.LinkPrefix+otelpb.LinkAttrPrefix)
+		return nil, errors.New("scope: link is not supported yet")
+		//scopes = fmt.Sprintf(`| filter name:"%s:"*`, otelpb.LinkPrefix+otelpb.LinkAttrPrefix)
 	case "intrinsic":
 		return nil, errors.New("scope: intrinsic is not supported yet")
 	case "", "all":
@@ -317,8 +319,10 @@ func searchTags(ctx context.Context, cp *tracecommon.CommonParams, traceQLStr st
 	}
 	for i := range fieldNames {
 		if strings.HasPrefix(fieldNames[i], otelpb.EventPrefix+otelpb.EventAttrPrefix) {
-			lIdx := strings.LastIndex(fieldNames[i], ":")
-			result.eventTagList = appendNoExceedN(result.eventTagList, fieldNames[i][len(otelpb.EventPrefix+otelpb.EventAttrPrefix):lIdx], limit)
+			// todo wait until LogsQL support search across fields.
+			continue
+			//lIdx := strings.LastIndex(fieldNames[i], ":")
+			//result.eventTagList = appendNoExceedN(result.eventTagList, fieldNames[i][len(otelpb.EventPrefix+otelpb.EventAttrPrefix):lIdx], limit)
 		} else if strings.HasPrefix(fieldNames[i], otelpb.SpanAttrPrefixField) {
 			result.spanTagList = appendNoExceedN(result.spanTagList, fieldNames[i][len(otelpb.SpanAttrPrefixField):], limit)
 		} else if strings.HasPrefix(fieldNames[i], otelpb.ResourceAttrPrefix) {
@@ -326,8 +330,10 @@ func searchTags(ctx context.Context, cp *tracecommon.CommonParams, traceQLStr st
 		} else if strings.HasPrefix(fieldNames[i], otelpb.InstrumentationScopeAttrPrefix) {
 			result.instrumentationScopeTagList = appendNoExceedN(result.instrumentationScopeTagList, fieldNames[i][len(otelpb.InstrumentationScopeAttrPrefix):], limit)
 		} else if strings.HasPrefix(fieldNames[i], otelpb.LinkPrefix+otelpb.LinkAttrPrefix) {
-			lIdx := strings.LastIndex(fieldNames[i], ":")
-			result.linkTagList = appendNoExceedN(result.linkTagList, fieldNames[i][len(otelpb.LinkPrefix+otelpb.LinkAttrPrefix):lIdx], limit)
+			// todo wait until LogsQL support search across fields.
+			continue
+			//lIdx := strings.LastIndex(fieldNames[i], ":")
+			//result.linkTagList = appendNoExceedN(result.linkTagList, fieldNames[i][len(otelpb.LinkPrefix+otelpb.LinkAttrPrefix):lIdx], limit)
 		}
 	}
 	return result, nil

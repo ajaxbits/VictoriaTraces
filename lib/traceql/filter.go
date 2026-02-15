@@ -27,4 +27,6 @@ type filter interface {
 	//matchRow(fields []Field) bool
 
 	// ToLogsQLFilter() logsql
+
+	GetTraceDurationFilters() []*filterCommon
 }
